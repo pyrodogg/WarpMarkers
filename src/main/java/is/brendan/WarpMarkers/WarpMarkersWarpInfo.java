@@ -33,10 +33,13 @@ import java.lang.Long;
 import java.lang.Integer;
 import java.text.SimpleDateFormat;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.*;
 
 import com.earth2me.essentials.Warps;
 
@@ -107,11 +110,11 @@ public class WarpMarkersWarpInfo {
 
     public boolean touch(String what, String warpname, String username) {
 	try {
-	    Location location = warps.getWarp(warpname);
-	    Configuration conf = getOrMakeWarpConf(warpname);
-	    conf.setProperty(what+"time", dateFormat.format(new Date()));
-	    conf.setProperty(what+"by", username);
-	    conf.save();
+	    //Location location = warps.getWarp(warpname);
+	    YamlConfiguration conf = getOrMakeWarpConf(warpname);
+	    conf.set(what+"time", dateFormat.format(new Date()));
+	    conf.set(what+"by", username);
+	    conf.save(warpname);
 	    if (what.equals("accessed")) {
 		addUpdate(ACCESSED,warpname,username);
 	    } else {
@@ -138,17 +141,18 @@ public class WarpMarkersWarpInfo {
 	updates.add(update);
     }
 
-    private Configuration getOrMakeWarpConf(String name) {
+    private YamlConfiguration getOrMakeWarpConf(String name) {
 	File confFile = new File(warpsFolder, name.toLowerCase() + ".yml");
-	Configuration conf = new Configuration(confFile);
+	YamlConfiguration conf = YamlConfiguration.loadConfiguration(confFile);
 	if (!confFile.exists()) {
-	    conf.setProperty("accessedby", "n/a");
-	    conf.setProperty("accessedtime", "n/a");
-	    conf.setProperty("createdby", "n/a");
-	    conf.setProperty("createdtime", "n/a");
-	    conf.save();
-	} else {
-	    conf.load();
+	    conf.set("accessedby", "n/a");
+	    conf.set("accessedtime", "n/a");
+	    conf.set("createdby", "n/a");
+	    conf.set("createdtime", "n/a");
+	    try {
+			conf.save(confFile);
+		} catch (IOException e) {
+		}
 	}
 	return conf;
     }
@@ -157,12 +161,12 @@ public class WarpMarkersWarpInfo {
 	JSONObject retval = new JSONObject();
 	try {
 	    Location location = warps.getWarp(name);
-	    Configuration conf = getOrMakeWarpConf(name);
+	    YamlConfiguration conf = getOrMakeWarpConf(name);
 	    retval.put("name", name);
-	    retval.put("accessedby", conf.getProperty("accessedby"));
-	    retval.put("accessedtime", conf.getProperty("accessedtime"));
-	    retval.put("createdby", conf.getProperty("createdby"));
-	    retval.put("createdtime", conf.getProperty("createdtime"));
+	    retval.put("accessedby", conf.getString("accessedby"));
+	    retval.put("accessedtime", conf.getString("accessedtime"));
+	    retval.put("createdby", conf.getString("createdby"));
+	    retval.put("createdtime", conf.getString("createdtime"));
 	    retval.put("world", location.getWorld().getName());
 	    retval.put("x", location.getBlockX());
 	    retval.put("y", location.getBlockY());

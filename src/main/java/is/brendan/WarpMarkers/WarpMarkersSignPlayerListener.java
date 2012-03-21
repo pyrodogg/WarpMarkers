@@ -25,16 +25,13 @@ MA  02110-1301, USA.
 
 package is.brendan.WarpMarkers;
 
-import java.util.logging.*;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerListener;
 
-import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
 import com.earth2me.essentials.signs.*;
 import com.earth2me.essentials.signs.EssentialsSign.*;
@@ -44,7 +41,7 @@ import com.earth2me.essentials.signs.EssentialsSign.*;
  * @author Brendan Johan Lee - deadcyclo@vanntett.net
  */
 
-public class WarpMarkersSignPlayerListener extends PlayerListener {
+public class WarpMarkersSignPlayerListener  {
     private final WarpMarkers plugin;
 
     public WarpMarkersSignPlayerListener(WarpMarkers instance) {

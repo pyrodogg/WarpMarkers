@@ -31,12 +31,13 @@ import java.util.logging.*;
 import java.util.Iterator;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
+//import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.*;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.Command;
@@ -56,9 +57,16 @@ import com.earth2me.essentials.User;
  */
 
 public class WarpMarkers extends JavaPlugin {
-    private final WarpMarkersSignPlayerListener signPlayerListener = new WarpMarkersSignPlayerListener(this);
-    private final WarpMarkersPluginEnabledListener pluginEnabledListener = new WarpMarkersPluginEnabledListener(this);
-    private final WarpMarkersPluginDisabledListener pluginDisabledListener = new WarpMarkersPluginDisabledListener(this);
+	
+    private WarpMarkersSignPlayerListener signPlayerListener;
+    //= new WarpMarkersSignPlayerListener(this);
+    //private WarpMarkersPluginEnabledListener pluginEnabledListener;
+    //= new WarpMarkersPluginEnabledListener(this);
+    //private WarpMarkersPluginDisabledListener pluginDisabledListener;
+    //= new WarpMarkersPluginDisabledListener(this);
+    
+    private WarpMarkersServerListener serverListener;
+    
     private Boolean hasUpdated = true;
     private Boolean previousUpdateWasEmpty = false;
     private PluginDescriptionFile pdfFile;
@@ -116,15 +124,18 @@ public class WarpMarkers extends JavaPlugin {
 		
 	File configFile = new File(getDataFolder(), "config.yml");
 	getDataFolder().mkdirs();
-	Configuration config = new Configuration(configFile);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 	if (!configFile.exists()) {
-	    config.setProperty("saveInterval",3000);
-	    config.setProperty("updateLife",15000);
-	    config.setProperty("outputFile","world/warpmarkers.json");
-	    config.setProperty("updateFile","world/warpupdates.json");
-	    config.save();
-	} else {
-	    config.load();
+	    config.set("saveInterval",3000);
+	    config.set("updateLife",15000);
+	    config.set("outputFile","world/warpmarkers.json");
+	    config.set("updateFile","world/warpupdates.json");
+	    try {
+			config.save(configFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			fail("Unable to create " + configFile.getName() + ": " + e.getMessage());
+		}
 	}
 	
 	interval = config.getInt("saveInterval",3000);
@@ -152,9 +163,13 @@ public class WarpMarkers extends JavaPlugin {
 
 	enableEssentialsListening();
 
-	pm.registerEvent(Event.Type.PLUGIN_ENABLE, pluginEnabledListener, Priority.Normal, this);
-	pm.registerEvent(Event.Type.PLUGIN_DISABLE, pluginDisabledListener, Priority.Normal, this);
-	pm.registerEvent(Event.Type.PLAYER_INTERACT, signPlayerListener, Priority.Normal, this);
+	//pm.registerEvent(Event.Type.PLUGIN_ENABLE, pluginEnabledListener, Priority.Normal, this);
+	//pm.registerEvent(Event.Type.PLUGIN_DISABLE, pluginDisabledListener, Priority.Normal, this);
+	//pm.registerEvent(Event.Type.PLAYER_INTERACT, signPlayerListener, Priority.Normal, this);
+	
+	serverListener = new WarpMarkersServerListener(this);
+	
+	pm.registerEvents(serverListener, this);
 
 	log(Level.INFO, "Loaded "+pdfFile.getName() + " build " + pdfFile.getVersion() + " by Brendan Johan Lee <deadcyclo@vanntett.net>","");
     }
